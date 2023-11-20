@@ -1,0 +1,63 @@
+{
+    "editor.formatOnSave": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.preferences.importModuleSpecifier": "project-relative",
+    "typescript.tsserver.maxTsServerMemory": 4096,
+    "eslint.runtime": "node",
+    "eslint.execArgv": ["--max_old_space_size=4096"],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    },
+    "[prisma]": {
+        "editor.defaultFormatter": "Prisma.prisma"
+    },
+    "[json]": {
+        "editor.quickSuggestions": {
+            "strings": true
+        },
+        "editor.suggest.insertMode": "replace",
+        "gitlens.codeLens.scopes": ["document"],
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[sql]": {
+        "editor.defaultFormatter": "ms-mssql.mssql"
+    },
+    "[terraform]": {
+        "editor.defaultFormatter": "hashicorp.terraform"
+    },
+    "[terraform-vars]": {
+        "editor.defaultFormatter": "hashicorp.terraform"
+    },
+    "[astro]": {
+        "editor.defaultFormatter": "astro-build.astro-vscode"
+    },
+    "cSpell.enabled": true,
+    "cSpell.enableFiletypes": [],
+    "vitest.commandLine": "pnpm vitest",
+    "vitest.nodeEnv": {
+        "LOG_LEVEL": "debug"
+    },
+    "vitest.exclude": [
+        "**/node_modules/**",
+        "**/out-tsc/**",
+        "**/dist/**",
+        "**/cypress/**",
+        "**/.{idea,git,cache,output,temp}/**"
+    ],
+    "terraform.experimentalFeatures.validateOnSave": true,
+    "hediet.vscode-drawio.theme": "Kennedy",
+    "hediet.vscode-drawio.customFonts": ["Calibri"],
+    "hediet.vscode-drawio.defaultVertexStyle": {
+        "fontFamily": "Calibri",
+        "fillColor": "#dae8fc",
+        "strokeColor": "#6c8ebf",
+        "strokeWidth": "1",
+        "labelBackgroundColor": "none"
+    },
+    "hediet.vscode-drawio.defaultEdgeStyle": {
+        "edgeStyle": "orthogonalEdgeStyle;"
+    },
+    "pasteImage.path": "${currentFileDir}/images",
+    "cSpell.words": ["healthcheck", "opentelemetry", "OTEL", "otlp", "Pino"]
+}
