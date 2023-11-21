@@ -7,23 +7,7 @@ import { UserAvatar } from './user-avatar'
 const topbarStyles = css({
     display: 'flex',
     justifyContent: 'space-between',
-    bg: '#101010',
     p: '14px 30px',
-})
-
-const buttonStyles = css({
-    color: '#7a7a7a',
-    cursor: 'not-allowed',
-    width: '34px',
-    height: '34px',
-    borderRadius: '100%',
-    fontSize: '18px',
-    border: '0px',
-    bg: '#090909',
-    mr: '10px',
-    '&:hover': {
-        bg: '#f2f2f2',
-    },
 })
 
 const navbarStyles = css({
@@ -76,15 +60,10 @@ const loginButtonStyles = css({
 export function Topbar({ user }: { user: SerializeFrom<User> | undefined }) {
     return (
         <div className={topbarStyles}>
-            <div></div>
+            <div />
 
             <div className={navbarStyles}>
                 <ul className={navbarListStyles}>
-                    <li className={navbarItemStyles}>
-                        <a href="#" className={navbarLinkStyles}>
-                            Premium
-                        </a>
-                    </li>
                     <li className={navbarItemStyles}>
                         <a href="#" className={navbarLinkStyles}>
                             Support
@@ -93,7 +72,7 @@ export function Topbar({ user }: { user: SerializeFrom<User> | undefined }) {
                     <li className={`${navbarItemStyles} ${dividerStyles}`}>|</li>
                     {user ? null : (
                         <li className={navbarItemStyles}>
-                            <a href="#" className={navbarLinkStyles}>
+                            <a href="https://www.spotify.com/au/signup" className={navbarLinkStyles}>
                                 Sign Up
                             </a>
                         </li>

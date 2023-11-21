@@ -79,20 +79,20 @@ const Navigation = ({ items }: { items: Array<{ href: string; icon: JSX.ElementT
 
 export function Sidebar() {
     const mainNavigationItems = [
-        { href: '#', icon: Home, label: 'Home' },
-        { href: '#', icon: Search, label: 'Search' },
-        { href: '#', icon: Book, label: 'Your Library' },
+        { href: '/', icon: Home, label: 'Home' },
+        { href: '/search', icon: Search, label: 'Search' },
+        { href: '/library', icon: Book, label: 'Your Library' },
     ]
 
     const secondaryNavigationItems = [
-        { href: '#', icon: Plus, label: 'Create Playlist' },
-        { href: '#', icon: Heart, label: 'Liked Songs' },
+        { href: '/playlist/create', icon: Plus, label: 'Create Playlist' },
+        { href: '/playlist/liked', icon: Heart, label: 'Liked Songs' },
     ]
 
     return (
         <div className={sidebarStyles}>
             <div className={logoImageStyles}>
-                <a href="#">
+                <a href="/">
                     <img src="/logo.png" alt="Logo" />
                 </a>
             </div>

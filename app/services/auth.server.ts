@@ -1,4 +1,5 @@
 import { Authenticator } from 'remix-auth'
+import type { User } from 'remix-auth-spotify'
 import { SpotifyStrategy } from 'remix-auth-spotify'
 
 import { sessionStorage } from '~/services/session.server'
@@ -18,6 +19,15 @@ if (!process.env.SPOTIFY_CALLBACK_URL) {
 // See https://developer.spotify.com/documentation/general/guides/authorization/scopes
 const scopes = ['user-read-email'].join(' ')
 
+export interface ExtendedSpotifySession {
+    accessToken: string
+    expiresIn: number
+    expiresAt: number
+    refreshToken?: string
+    tokenType?: string
+    user: User | null
+}
+
 export const spotifyStrategy = new SpotifyStrategy(
     {
         clientID: process.env.SPOTIFY_CLIENT_ID,
@@ -29,6 +39,7 @@ export const spotifyStrategy = new SpotifyStrategy(
     async ({ accessToken, refreshToken, extraParams, profile }) => ({
         accessToken,
         refreshToken,
+        expiresIn: extraParams.expiresIn,
         expiresAt: Date.now() + extraParams.expiresIn * 1000,
         tokenType: extraParams.tokenType,
         user: {

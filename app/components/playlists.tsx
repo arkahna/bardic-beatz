@@ -1,3 +1,4 @@
+import { SimplifiedPlaylist } from '@spotify/web-api-ts-sdk'
 import { css } from '../../styled-system/css'
 
 const spotifyPlaylistsStyles = css({
@@ -70,31 +71,27 @@ const paragraphStyles = css({
     fontWeight: '600',
 })
 
-const SpotifyPlaylistsItem = ({
-    imageUrl,
-    title,
-    description,
-}: {
-    title: string
-    description: string
-    imageUrl: string
-}) => (
+const SpotifyPlaylistsItem = ({ images: [imageUrl], name, description }: SimplifiedPlaylist) => (
     <div className={itemStyles}>
-        <img className={imageStyles} src={imageUrl} alt={title} />
+        <img className={imageStyles} src={imageUrl.url} />
         <div className={playStyles}>
             <span className={iconStyles}>▶️</span>
         </div>
-        <h4 className={headingStyles}>{title}</h4>
+        <h4 className={headingStyles}>{name}</h4>
         <p className={paragraphStyles}>{description}</p>
     </div>
 )
 
-export function SpotifyPlaylists() {
-    const playlistItems: Array<{ title: string; description: string; imageUrl: string }> = []
-
+export function SpotifyPlaylists({
+    collectionTitle,
+    playlistItems,
+}: {
+    collectionTitle: string
+    playlistItems: SimplifiedPlaylist[]
+}) {
     return (
         <div className={spotifyPlaylistsStyles}>
-            <h2 className={titleStyles}>Spotify Playlists</h2>
+            <h2 className={titleStyles}>{collectionTitle}</h2>
             <div className={listStyles}>
                 {playlistItems.map((item, index) => (
                     <SpotifyPlaylistsItem key={index} {...item} />
