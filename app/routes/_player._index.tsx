@@ -11,7 +11,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const sdk = spotifySdk(session)
 
     const featuredPlaylists = await sdk.browse.getFeaturedPlaylists('AU')
-    console.log(JSON.stringify({ featuredPlaylists }, null, 4))
 
     return json({ featuredPlaylists })
 }
