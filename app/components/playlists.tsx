@@ -71,15 +71,15 @@ const paragraphStyles = css({
     fontWeight: '600',
 })
 
-const SpotifyPlaylistsItem = ({ images: [imageUrl], name, description }: SimplifiedPlaylist) => (
-    <div className={itemStyles}>
+const SpotifyPlaylistsItem = ({ images: [imageUrl], name, description, id }: SimplifiedPlaylist) => (
+    <a className={itemStyles} href={`/playlist/${id}`}>
         <img className={imageStyles} src={imageUrl.url} />
         <div className={playStyles}>
             <span className={iconStyles}>▶️</span>
         </div>
         <h4 className={headingStyles}>{name}</h4>
         <p className={paragraphStyles}>{description}</p>
-    </div>
+    </a>
 )
 
 export function SpotifyPlaylists({

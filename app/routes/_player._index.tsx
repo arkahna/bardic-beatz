@@ -7,10 +7,10 @@ import { spotifyStrategy } from '../services/auth.server'
 import { spotifySdk } from '../services/spotify.server'
 
 export async function loader({ request }: LoaderFunctionArgs) {
-    const session = (await spotifyStrategy.getSession(request)) as ExtendedSpotifySession
-    const sdk = spotifySdk(session)
+    const session = (await spotifyStrategy.getSession(request)) as ExtendedSpotifySession | null
+    const sdk = session ? spotifySdk(session) : undefined
 
-    const featuredPlaylists = await sdk.browse.getFeaturedPlaylists('AU')
+    const featuredPlaylists = sdk ? await sdk.browse.getFeaturedPlaylists('AU') : undefined
 
     return json({ featuredPlaylists })
 }
@@ -20,10 +20,12 @@ export default function Home() {
 
     return (
         <div>
-            <SpotifyPlaylists
-                collectionTitle="Featured Playlists"
-                playlistItems={data.featuredPlaylists.playlists.items}
-            />
+            {data.featuredPlaylists ? (
+                <SpotifyPlaylists
+                    collectionTitle="Featured Playlists"
+                    playlistItems={data.featuredPlaylists.playlists.items}
+                />
+            ) : null}
         </div>
     )
 }

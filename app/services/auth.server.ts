@@ -17,7 +17,13 @@ if (!process.env.SPOTIFY_CALLBACK_URL) {
 }
 
 // See https://developer.spotify.com/documentation/general/guides/authorization/scopes
-const scopes = ['user-read-email'].join(' ')
+const scopes = [
+    'user-read-email',
+    'streaming',
+    'user-read-currently-playing',
+    'user-read-playback-state',
+    'user-modify-playback-state',
+].join(' ')
 
 export interface ExtendedSpotifySession {
     accessToken: string
@@ -36,19 +42,23 @@ export const spotifyStrategy = new SpotifyStrategy(
         sessionStorage,
         scope: scopes,
     },
-    async ({ accessToken, refreshToken, extraParams, profile }) => ({
-        accessToken,
-        refreshToken,
-        expiresIn: extraParams.expiresIn,
-        expiresAt: Date.now() + extraParams.expiresIn * 1000,
-        tokenType: extraParams.tokenType,
-        user: {
-            id: profile.id,
-            email: profile.emails[0].value,
-            name: profile.displayName,
-            image: profile.__json.images?.[0]?.url,
-        },
-    })
+    async ({ accessToken, refreshToken, extraParams, profile }) => {
+        console.log('profile', profile)
+        console.log('extraParams', extraParams)
+        return {
+            accessToken,
+            refreshToken,
+            expiresIn: extraParams.expiresIn,
+            expiresAt: Date.now() + extraParams.expiresIn * 1000,
+            tokenType: extraParams.tokenType,
+            user: {
+                id: profile.id,
+                email: profile.emails[0].value,
+                name: profile.displayName,
+                image: profile.__json.images?.[0]?.url,
+            },
+        }
+    }
 )
 
 export const authenticator = new Authenticator(sessionStorage, {
