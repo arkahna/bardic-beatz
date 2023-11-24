@@ -18,10 +18,7 @@ const titleStyles = css({
 export async function loader({ request }: LoaderFunctionArgs) {
     const session = (await spotifyStrategy.getSession(request)) as ExtendedSpotifySession | null
     const sdk = session ? spotifySdk(session) : undefined
-    let playlists
-    if (session?.user?.id) {
-        playlists = sdk ? await sdk.playlists.getUsersPlaylists(session?.user?.id) : undefined
-    }
+    const playlists = sdk ? await sdk.currentUser.playlists.playlists(50) : undefined
     const audiobooks = sdk ? await sdk.currentUser.audiobooks.savedAudiobooks(50) : undefined
     return json({ playlists, audiobooks })
 }
