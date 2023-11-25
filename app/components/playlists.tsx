@@ -1,4 +1,4 @@
-import { SimplifiedPlaylist } from '@spotify/web-api-ts-sdk'
+import type { SimplifiedPlaylist } from '@spotify/web-api-ts-sdk'
 import { css } from '../../styled-system/css'
 
 const spotifyPlaylistsStyles = css({
