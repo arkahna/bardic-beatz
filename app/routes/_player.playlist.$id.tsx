@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from '@remix-run/node'
 import { json } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { Outlet, useLoaderData } from '@remix-run/react'
+import { css } from '../../styled-system/css'
 import { SpotifyPlaylistDetail } from '../components/playlist-detail'
 import type { ExtendedSpotifySession } from '../services/auth.server'
 import { spotifyStrategy } from '../services/auth.server'
@@ -20,9 +21,19 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     return json({ playlistDetails })
 }
 
+const containerStyles = css({
+    display: 'flex',
+    flexDirection: 'row',
+})
+
 export default function Playlist() {
     const data = useLoaderData<typeof loader>()
     const playlist = data.playlistDetails
 
-    return <div>{playlist ? <SpotifyPlaylistDetail playlist={playlist} /> : null}</div>
+    return (
+        <div className={containerStyles}>
+            {playlist ? <SpotifyPlaylistDetail playlist={playlist} /> : null}
+            <Outlet />
+        </div>
+    )
 }

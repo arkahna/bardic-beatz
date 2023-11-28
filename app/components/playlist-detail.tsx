@@ -1,4 +1,6 @@
+import { Link } from '@remix-run/react'
 import type { Playlist, PlaylistedTrack } from '@spotify/web-api-ts-sdk'
+import { ReactNode } from 'react'
 import { css } from '../../styled-system/css'
 import { usePlay } from '../lib/usePlay'
 
@@ -114,7 +116,15 @@ export function SpotifyPlaylistDetail({ playlist }: { playlist: Playlist }) {
         const artists =
             'show' in item.track
                 ? 'Podcast' // You can replace this with more specific info if available
-                : item.track.artists.map((artist) => artist.name).join(', ')
+                : item.track.artists
+                      .map((artist) => (
+                          <Link to={`artist/${artist.id}`} key={artist.id}>
+                              {artist.name}
+                          </Link>
+                      ))
+                      .reduce<ReactNode[]>((prev, curr, index, array) => {
+                          return index < array.length - 1 ? [...prev, curr, ', '] : [...prev, curr]
+                      }, [])
 
         const duration = formatDuration(item.track.duration_ms)
 

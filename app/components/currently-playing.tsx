@@ -62,21 +62,20 @@ const songSectionStyles = css({
     justifyItems: 'center',
 })
 
-const track = {
-    name: '',
-    album: {
-        images: [{ url: '' }],
-    },
-    artists: [{ name: '' }],
-}
-
 export function CurrentlyPlaying() {
     usePlay()
 
     const [, setPlayer] = useState<Spotify.Player | undefined>(undefined)
     const [isPaused, setPaused] = useState(false)
     const [, setActive] = useState(false)
-    const [current_track, setTrack] = useState(track)
+    const [current_track, setTrack] = useState<
+        | {
+              name: string
+              album: { images: Array<{ url: string }> }
+              artists: Array<{ name: string }>
+          }
+        | undefined
+    >()
     const [position, setPosition] = useState(0)
     const [duration, setDuration] = useState(0)
 
@@ -121,6 +120,10 @@ export function CurrentlyPlaying() {
             player.connect()
         }
     }, [])
+
+    if (!current_track) {
+        return null
+    }
 
     return (
         <div className={currentlyPlayingStyles}>
