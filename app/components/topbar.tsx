@@ -2,6 +2,7 @@ import type { SerializeFrom } from '@remix-run/node'
 import { Form } from '@remix-run/react'
 import type { User } from 'remix-auth-spotify'
 import { css } from '../../styled-system/css'
+import { Players } from './players'
 import { UserAvatar } from './user-avatar'
 
 const topbarStyles = css({
@@ -78,7 +79,13 @@ export function Topbar({ user }: { user: SerializeFrom<User> | undefined }) {
                         </li>
                     )}
                 </ul>
-                {user ? <UserAvatar user={user} /> : null}
+
+                {user ? (
+                    <>
+                        <Players />
+                        <UserAvatar user={user} />
+                    </>
+                ) : null}
                 <Form action={user ? '/logout' : '/auth/spotify'} method="post">
                     <button className={loginButtonStyles}>{user ? 'Logout' : 'Log in with Spotify'}</button>
                 </Form>

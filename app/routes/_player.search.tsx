@@ -169,5 +169,5 @@ const formStyle = css({
 })
 
 const spin = css({
-    animation: 'spin 1s linear infinite',
+    animation: 'spin 1s infinite',
 })

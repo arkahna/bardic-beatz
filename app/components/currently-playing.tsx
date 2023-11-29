@@ -66,7 +66,7 @@ declare global {
     interface Window {
         playerInstance?: Spotify.Player
 
-        stateInterval: NodeJS.Timeout
+        stateInterval?: NodeJS.Timeout
         initialised?: boolean
     }
 }
@@ -95,7 +95,6 @@ export function CurrentlyPlaying() {
             return
         }
 
-        console.log(state)
         setTrack(state.track_window.current_track)
         setPaused(state.paused)
         setPosition(state.position)
@@ -107,17 +106,20 @@ export function CurrentlyPlaying() {
     }
 
     useEffect(() => {
-        if (window.playerInstance) {
-            window.playerInstance.addListener('player_state_changed', playerStateChanged)
+        if (!window.stateInterval) {
             window.stateInterval = setInterval(() => {
-                window.playerInstance!.getCurrentState().then((state) => {
+                window.playerInstance?.getCurrentState().then((state) => {
                     if (!state) {
                         return
                     }
 
                     playerStateChanged(state)
                 })
-            }, 1000)
+            }, 300)
+        }
+        if (window.playerInstance) {
+            window.playerInstance.addListener('player_state_changed', playerStateChanged)
+
             return
         }
 
@@ -168,6 +170,7 @@ export function CurrentlyPlaying() {
         return () => {
             window.playerInstance?.removeListener('player_state_changed', playerStateChanged)
             clearInterval(window.stateInterval)
+            window.stateInterval = undefined
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
@@ -194,7 +197,18 @@ export function CurrentlyPlaying() {
                     <IconButton onClick={() => {}} variant="ghost">
                         <SkipBack color="white" />
                     </IconButton>
-                    <IconButton onClick={() => {}} variant="ghost">
+                    <IconButton
+                        onClick={() => {
+                            if (window.playerInstance) {
+                                if (isPaused) {
+                                    window.playerInstance.resume()
+                                } else {
+                                    window.playerInstance.pause()
+                                }
+                            }
+                        }}
+                        variant="ghost"
+                    >
                         {!isPaused ? <Pause color="white" /> : <Play color="white" />}
                     </IconButton>
                     <IconButton onClick={() => {}} variant="ghost">
