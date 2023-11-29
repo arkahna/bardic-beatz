@@ -1,4 +1,4 @@
-import type { SimplifiedPlaylist } from '@spotify/web-api-ts-sdk'
+import type { SimplifiedAudiobook } from '@spotify/web-api-ts-sdk'
 import { css } from '../../styled-system/css'
 
 const spotifyPlaylistsStyles = css({
@@ -18,6 +18,7 @@ const titleStyles = css({
 const listStyles = css({
     display: 'flex',
     gap: '20px',
+    //overflow: 'hidden',
 })
 
 const itemStyles = css({
@@ -74,31 +75,35 @@ const paragraphStyles = css({
     fontWeight: '600',
 })
 
-const SpotifyPlaylistsItem = ({ images: [imageUrl], name, description, id }: SimplifiedPlaylist) => (
-    <a className={itemStyles} href={`/playlist/${id}`}>
+const SpotifyAudiobooksItem = ({ images: [imageUrl], name, description, id, authors }: SimplifiedAudiobook) => (
+    <a className={itemStyles} href={`/audiobooks/${id}`}>
         <img className={imageStyles} src={imageUrl.url} />
         <div className={playStyles}>
             <span className={iconStyles}>▶️</span>
         </div>
         <h4 className={headingStyles}>{name}</h4>
-        <p className={paragraphStyles}>{description}</p>
+        {authors.map((author, index) => (
+            <p className={paragraphStyles} key={index}>
+                {author.name}
+            </p>
+        ))}
     </a>
 )
 
-export function SpotifyPlaylists({
+export function SpotifyAudiobooks({
     collectionTitle,
-    playlistItems,
+    audiobooksItems,
 }: {
     collectionTitle: string
-    playlistItems: SimplifiedPlaylist[]
+    audiobooksItems: SimplifiedAudiobook[]
 }) {
     return (
         <div className={spotifyPlaylistsStyles}>
             <h2 className={titleStyles}>{collectionTitle}</h2>
             <div className={scrollWrapper}>
                 <div className={listStyles}>
-                    {playlistItems.map((item, index) => (
-                        <SpotifyPlaylistsItem key={index} {...item} />
+                    {audiobooksItems.map((item, index) => (
+                        <SpotifyAudiobooksItem key={index} {...item} />
                     ))}
                 </div>
             </div>
