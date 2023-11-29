@@ -172,7 +172,6 @@ export function SpotifyPlaylistDetail({ playlist }: { playlist: Playlist }) {
                         <th className={thStyles}>#</th>
                         <th className={thStyles}>Title</th>
                         <th className={thStyles}>Album</th>
-                        <th className={thStyles}>Liked</th>
                         <th className={thStyles}>Duration</th>
                     </tr>
                 </thead>

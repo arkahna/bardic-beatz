@@ -8,9 +8,17 @@ const showThumbOnHover = css({
     },
 })
 
-export function VolumeBar({ value }: { value: number }) {
+export function VolumeBar({ value, onValueChanged }: { value: number; onValueChanged: (value: number) => void }) {
     return (
-        <Slider.Root min={0} max={100} defaultValue={[value]} className={showThumbOnHover} size="sm" maxWidth="100px">
+        <Slider.Root
+            min={0}
+            max={100}
+            defaultValue={[value]}
+            onValueChange={(e) => onValueChanged(e.value[0])}
+            className={showThumbOnHover}
+            size="sm"
+            maxWidth="100px"
+        >
             <Slider.Control>
                 <Slider.Track>
                     <Slider.Range />

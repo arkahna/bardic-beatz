@@ -18,8 +18,9 @@ if (!process.env.SPOTIFY_CALLBACK_URL) {
 
 // See https://developer.spotify.com/documentation/general/guides/authorization/scopes
 const scopes = [
-    'user-read-email',
     'streaming',
+    'user-read-email',
+    'user-read-private',
     'user-read-currently-playing',
     'user-read-playback-state',
     'user-modify-playback-state',

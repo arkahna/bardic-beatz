@@ -5,7 +5,6 @@ import { spotifySdk } from '../services/spotify.server'
 
 export async function action({ request }: ActionFunctionArgs) {
     const session = (await spotifyStrategy.getSession(request)) as ExtendedSpotifySession | null
-    console.log(session)
     if (!session) {
         throw new Response('Unauthorized', { status: 401 })
     }

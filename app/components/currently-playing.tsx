@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Pause, Play, SkipBack, SkipForward, Volume2 } from 'react-feather' // Importing icons
 import { css } from '../../styled-system/css'
-import { usePlay } from '../lib/usePlay'
+import { useGetToken } from '../lib/useGetToken'
 import { IconButton } from './primatives/icon-button'
 import { ProgressBar } from './progress-bar'
 import { VolumeBar } from './volume-bar'
@@ -62,10 +62,19 @@ const songSectionStyles = css({
     justifyItems: 'center',
 })
 
-export function CurrentlyPlaying() {
-    usePlay()
+declare global {
+    interface Window {
+        playerInstance?: Spotify.Player
 
-    const [, setPlayer] = useState<Spotify.Player | undefined>(undefined)
+        stateInterval: NodeJS.Timeout
+        initialised?: boolean
+    }
+}
+
+export function CurrentlyPlaying() {
+    // const play = usePlay()
+    const getToken = useGetToken()
+
     const [isPaused, setPaused] = useState(false)
     const [, setActive] = useState(false)
     const [current_track, setTrack] = useState<
@@ -78,8 +87,45 @@ export function CurrentlyPlaying() {
     >()
     const [position, setPosition] = useState(0)
     const [duration, setDuration] = useState(0)
+    // as % of 100
+    const [volume, setVolume] = useState(50)
+
+    function playerStateChanged(state: Spotify.PlaybackState) {
+        if (!state) {
+            return
+        }
+
+        console.log(state)
+        setTrack(state.track_window.current_track)
+        setPaused(state.paused)
+        setPosition(state.position)
+        setDuration(state.duration)
+
+        window.playerInstance!.getCurrentState().then((state) => {
+            !state ? setActive(false) : setActive(true)
+        })
+    }
 
     useEffect(() => {
+        if (window.playerInstance) {
+            window.playerInstance.addListener('player_state_changed', playerStateChanged)
+            window.stateInterval = setInterval(() => {
+                window.playerInstance!.getCurrentState().then((state) => {
+                    if (!state) {
+                        return
+                    }
+
+                    playerStateChanged(state)
+                })
+            }, 1000)
+            return
+        }
+
+        if (window.initialised) {
+            return
+        }
+        window.initialised = true
+
         const script = document.createElement('script')
         script.src = 'https://sdk.scdn.co/spotify-player.js'
         script.async = true
@@ -87,38 +133,43 @@ export function CurrentlyPlaying() {
         document.body.appendChild(script)
 
         window.onSpotifyWebPlaybackSDKReady = () => {
-            const player = new window.Spotify.Player({
+            window.playerInstance = new window.Spotify.Player({
                 name: 'Bardic Beatz',
-                getOAuthToken(cb) {},
-                volume: 0.5,
+                async getOAuthToken(cb) {
+                    try {
+                        cb(await getToken())
+                    } catch (err) {
+                        console.log(err)
+                    }
+                },
+                volume: volume / 100,
             })
 
-            setPlayer(player)
+            window.playerInstance.addListener('player_state_changed', playerStateChanged)
 
-            player.addListener('ready', ({ device_id }) => {
+            console.log('Connecting to spotify')
+            window.playerInstance.addListener('ready', ({ device_id }) => {
                 console.log('Ready with Device ID', device_id)
             })
 
-            player.addListener('not_ready', ({ device_id }) => {
+            window.playerInstance.addListener('not_ready', ({ device_id }) => {
                 console.log('Device ID has gone offline', device_id)
             })
-            player.addListener('player_state_changed', (state) => {
-                if (!state) {
-                    return
-                }
-
-                setTrack(state.track_window.current_track)
-                setPaused(state.paused)
-                setPosition(state.position)
-                setDuration(state.duration)
-
-                player.getCurrentState().then((state) => {
-                    !state ? setActive(false) : setActive(true)
+            window.playerInstance
+                .connect()
+                .catch((err) => {
+                    console.log('Failed to connect', err)
                 })
-            })
-
-            player.connect()
+                .then(() => {
+                    console.log('Connected')
+                })
         }
+
+        return () => {
+            window.playerInstance?.removeListener('player_state_changed', playerStateChanged)
+            clearInterval(window.stateInterval)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     if (!current_track) {
@@ -156,7 +207,13 @@ export function CurrentlyPlaying() {
             </div>
             <div className={volumeStyles}>
                 <Volume2 />
-                <VolumeBar value={50} />
+                <VolumeBar
+                    value={volume}
+                    onValueChanged={(e) => {
+                        setVolume(e)
+                        window.playerInstance?.setVolume(e / 100)
+                    }}
+                />
             </div>
         </div>
     )
