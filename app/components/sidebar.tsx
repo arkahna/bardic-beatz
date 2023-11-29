@@ -1,3 +1,4 @@
+import { Link } from '@remix-run/react'
 import { Book, Heart, Home, Plus, Search } from 'react-feather'
 import { css } from '../../styled-system/css'
 
@@ -64,14 +65,14 @@ const Navigation = ({ items }: { items: Array<{ href: string; icon: JSX.ElementT
     <ul className={navigationListStyles}>
         {items.map((item, index) => (
             <li key={index} className={navigationItemStyles}>
-                <a href={item.href} className={navigationLinkStyles}>
+                <Link to={item.href} className={navigationLinkStyles}>
                     {typeof item.icon === 'string' ? (
                         <span className={iconStyles}>{item.icon}</span>
                     ) : (
                         <item.icon className={iconStyles} />
                     )}
                     <span>{item.label}</span>
-                </a>
+                </Link>
             </li>
         ))}
     </ul>
@@ -92,9 +93,9 @@ export function Sidebar() {
     return (
         <div className={sidebarStyles}>
             <div className={logoImageStyles}>
-                <a href="/">
+                <Link to="/">
                     <img src="/logo.png" alt="Logo" />
-                </a>
+                </Link>
             </div>
 
             <Navigation items={mainNavigationItems} />

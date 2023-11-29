@@ -1,11 +1,108 @@
 import type { LoaderFunctionArgs } from '@remix-run/node'
 import { json } from '@remix-run/node'
-import { useLoaderData } from '@remix-run/react'
+import { Link, useFetcher, useLoaderData } from '@remix-run/react'
+import { Loader } from 'react-feather'
 import { css } from '../../styled-system/css'
-import { SearchComponent } from '../components/search'
+import { Button } from '../components/primatives/button'
+import { Input } from '../components/primatives/input'
 import type { ExtendedSpotifySession } from '../services/auth.server'
 import { spotifyStrategy } from '../services/auth.server'
 import { spotifySdk } from '../services/spotify.server'
+
+export async function loader({ request }: LoaderFunctionArgs) {
+    const session = (await spotifyStrategy.getSession(request)) as ExtendedSpotifySession | null
+    const sdk = session ? spotifySdk(session) : undefined
+
+    // Extract query parameter for search
+    const url = new URL(request.url)
+    const query = url.searchParams.get('q') || ''
+
+    const searchResults = query && sdk ? await sdk.search(query, ['track', 'playlist', 'artist', 'album']) : undefined
+
+    return json({ searchResults, query })
+}
+
+export default function Search() {
+    const data = useLoaderData<typeof loader>()
+    const search = useFetcher()
+    const searchResults = data?.searchResults
+
+    return (
+        <div className={searchResultsStyles}>
+            <search.Form method="get" className={formStyle}>
+                <Input
+                    name="q"
+                    type="text"
+                    placeholder="Search tracks, albums, artists..."
+                    className={inputClassName}
+                    defaultValue={data.query}
+                />
+                <Button type="submit" disabled={search.state === 'loading'}>
+                    Search
+                    {(search.state === 'loading' || search.state === 'submitting') && <Loader className={spin} />}
+                </Button>
+            </search.Form>
+
+            {searchResults ? (
+                <div>
+                    <h3 className={headingStyles}>Tracks</h3>
+                    <ul className={listStyles}>
+                        {searchResults.tracks.items.map((track) => (
+                            <li key={track.id} className={listItemStyles}>
+                                <div className={songDetailsStyles}>
+                                    {track.album.images[0] && (
+                                        <img
+                                            src={track.album.images[0].url}
+                                            alt={track.name}
+                                            className={songImageStyles}
+                                        />
+                                    )}
+                                    <div>
+                                        <Link to={`/player/track/${track.id}`} className={linkStyles}>
+                                            {track.name}
+                                        </Link>
+                                        <div>{track.artists.map((artist) => artist.name).join(', ')}</div>
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+
+                    <h3 className={headingStyles}>Playlists</h3>
+                    <ul className={listStyles}>
+                        {searchResults.playlists.items.map((playlist) => (
+                            <li key={playlist.id} className={listItemStyles}>
+                                <Link to={`/player/playlist/${playlist.id}`} className={linkStyles}>
+                                    {playlist.name}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                    <h3 className={headingStyles}>Artists</h3>
+                    <ul className={listStyles}>
+                        {searchResults.artists.items.map((artist) => (
+                            <li key={artist.id} className={listItemStyles}>
+                                <Link to={`/player/artist/${artist.id}`} className={linkStyles}>
+                                    {artist.name}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                    <h3 className={headingStyles}>Albums</h3>
+                    <ul className={listStyles}>
+                        {searchResults.albums.items.map((album) => (
+                            <li key={album.id} className={listItemStyles}>
+                                <Link to={`/player/album/${album.id}`} className={linkStyles}>
+                                    {album.name}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ) : null}
+        </div>
+    )
+}
 
 const searchResultsStyles = css({
     padding: '20px',
@@ -61,84 +158,16 @@ const songDetailsStyles = css({
     alignItems: 'center',
 })
 
-export async function loader({ request }: LoaderFunctionArgs) {
-    const session = (await spotifyStrategy.getSession(request)) as ExtendedSpotifySession | null
-    const sdk = session ? spotifySdk(session) : undefined
+const inputClassName = css({
+    color: 'white',
+})
 
-    // Extract query parameter for search
-    const url = new URL(request.url)
-    const query = url.searchParams.get('q') || ''
+const formStyle = css({
+    display: 'grid',
+    gridTemplateColumns: '1fr auto',
+    gap: '10px',
+})
 
-    const searchResults = query && sdk ? await sdk.search(query, ['track', 'playlist', 'artist', 'album']) : undefined
-
-    return json({ searchResults })
-}
-
-export default function Search() {
-    const data = useLoaderData<typeof loader>()
-    const searchResults = data?.searchResults
-
-    return (
-        <div className={searchResultsStyles}>
-            <SearchComponent />
-
-            {searchResults ? (
-                <div>
-                    <h3 className={headingStyles}>Tracks</h3>
-                    <ul className={listStyles}>
-                        {searchResults.tracks.items.map((track) => (
-                            <li key={track.id} className={listItemStyles}>
-                                <div className={songDetailsStyles}>
-                                    {track.album.images[0] && (
-                                        <img
-                                            src={track.album.images[0].url}
-                                            alt={track.name}
-                                            className={songImageStyles}
-                                        />
-                                    )}
-                                    <div>
-                                        <a href={`/player/track/${track.id}`} className={linkStyles}>
-                                            {track.name}
-                                        </a>
-                                        <div>{track.artists.map((artist) => artist.name).join(', ')}</div>
-                                    </div>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-
-                    <h3 className={headingStyles}>Playlists</h3>
-                    <ul className={listStyles}>
-                        {searchResults.playlists.items.map((playlist) => (
-                            <li key={playlist.id} className={listItemStyles}>
-                                <a href={`/player/playlist/${playlist.id}`} className={linkStyles}>
-                                    {playlist.name}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                    <h3 className={headingStyles}>Artists</h3>
-                    <ul className={listStyles}>
-                        {searchResults.artists.items.map((artist) => (
-                            <li key={artist.id} className={listItemStyles}>
-                                <a href={`/player/artist/${artist.id}`} className={linkStyles}>
-                                    {artist.name}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                    <h3 className={headingStyles}>Albums</h3>
-                    <ul className={listStyles}>
-                        {searchResults.albums.items.map((album) => (
-                            <li key={album.id} className={listItemStyles}>
-                                <a href={`/player/album/${album.id}`} className={linkStyles}>
-                                    {album.name}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            ) : null}
-        </div>
-    )
-}
+const spin = css({
+    animation: 'spin 1s linear infinite',
+})

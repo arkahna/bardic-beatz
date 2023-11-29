@@ -1,6 +1,6 @@
 import { Link } from '@remix-run/react'
 import type { Playlist, PlaylistedTrack } from '@spotify/web-api-ts-sdk'
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { css } from '../../styled-system/css'
 import { usePlay } from '../lib/usePlay'
 
