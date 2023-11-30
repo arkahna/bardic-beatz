@@ -7,7 +7,7 @@ import type { ExtendedSpotifySession } from '../services/auth.server'
 import { spotifyStrategy } from '../services/auth.server'
 import { spotifySdk } from '../services/spotify.server'
 
-const artistDetailStyles = css({
+export const artistDetailStyles = css({
     padding: '20px',
     color: '#ffffff',
     bg: '#181818',
@@ -79,19 +79,20 @@ const openLinkStyles = css({
 })
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
+    const artistId = params.artistId!
+
     const session = (await spotifyStrategy.getSession(request)) as ExtendedSpotifySession
     const sdk = spotifySdk(session)
 
-    const artistId = params.artistId!
     const artistDetails = await sdk.artists.get(artistId)
 
-    const topTracks = await sdk.artists.topTracks(artistId, 'AU')
+    const topTracks = await sdk.artists.topTracks(artistId, 'AU').then(delay(1000))
 
     return json({ artistDetails, topTracks })
 }
 
 export default function ArtistDetail() {
-    const { id } = useParams()
+    const { id: playlistId } = useParams()
     const { artistDetails, topTracks } = useLoaderData<typeof loader>()
     const image = artistDetails.images[0]
 
@@ -101,7 +102,7 @@ export default function ArtistDetail() {
                 <Link to={`/artist/${artistDetails.id}`} className={openLinkStyles}>
                     <ExternalLink size={16} className="mr-2" />
                 </Link>
-                <Link to={`/playlist/${id}`} className={openLinkStyles}>
+                <Link to={`/playlist/${playlistId}`} className={openLinkStyles}>
                     <X className={closeButtonStyles} size={24} />
                 </Link>
             </div>
@@ -120,4 +121,11 @@ export default function ArtistDetail() {
             </Link>
         </div>
     )
+}
+
+function delay<T>(delay: number) {
+    return async (res: T) => {
+        await new Promise((resolve) => setTimeout(resolve, delay))
+        return res
+    }
 }

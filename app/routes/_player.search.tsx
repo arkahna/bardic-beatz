@@ -1,7 +1,6 @@
 import type { LoaderFunctionArgs } from '@remix-run/node'
 import { json } from '@remix-run/node'
-import { Link, useFetcher, useLoaderData } from '@remix-run/react'
-import { Loader } from 'react-feather'
+import { Form, Link, useLoaderData, useNavigation } from '@remix-run/react'
 import { css } from '../../styled-system/css'
 import { Button } from '../components/primatives/button'
 import { Input } from '../components/primatives/input'
@@ -24,12 +23,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Search() {
     const data = useLoaderData<typeof loader>()
-    const search = useFetcher()
+    const navigation = useNavigation()
     const searchResults = data?.searchResults
+    const isSearching =
+        navigation.location?.pathname === '/search' &&
+        (navigation.state === 'loading' || navigation.state === 'submitting')
 
     return (
         <div className={searchResultsStyles}>
-            <search.Form method="get" className={formStyle}>
+            <Form method="get" className={formStyle}>
                 <Input
                     name="q"
                     type="text"
@@ -37,11 +39,10 @@ export default function Search() {
                     className={inputClassName}
                     defaultValue={data.query}
                 />
-                <Button type="submit" disabled={search.state === 'loading'}>
-                    Search
-                    {(search.state === 'loading' || search.state === 'submitting') && <Loader className={spin} />}
+                <Button type="submit" disabled={isSearching}>
+                    {isSearching ? 'Searching...' : 'Search'}
                 </Button>
-            </search.Form>
+            </Form>
 
             {searchResults ? (
                 <div>

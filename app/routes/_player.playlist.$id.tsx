@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from '@remix-run/node'
 import { json } from '@remix-run/node'
-import { Outlet, useLoaderData } from '@remix-run/react'
+import { useLoaderData, useNavigation } from '@remix-run/react'
 import { css } from '../../styled-system/css'
 import { SpotifyPlaylistDetail } from '../components/playlist-detail'
 import type { ExtendedSpotifySession } from '../services/auth.server'
@@ -21,19 +21,23 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     return json({ playlistDetails })
 }
 
+export default function Playlist() {
+    const data = useLoaderData<typeof loader>()
+    const navigation = useNavigation()
+
+    const playlist = data.playlistDetails
+
+    return <div className={containerStyles}>{playlist ? <SpotifyPlaylistDetail playlist={playlist} /> : null}</div>
+}
+
 const containerStyles = css({
     display: 'flex',
     flexDirection: 'row',
 })
 
-export default function Playlist() {
-    const data = useLoaderData<typeof loader>()
-    const playlist = data.playlistDetails
-
-    return (
-        <div className={containerStyles}>
-            {playlist ? <SpotifyPlaylistDetail playlist={playlist} /> : null}
-            <Outlet />
-        </div>
-    )
-}
+const progressStyles = css({
+    position: 'absolute',
+    top: '50%',
+    right: '120px',
+    transform: 'translateY(-50%)',
+})
