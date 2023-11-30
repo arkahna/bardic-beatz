@@ -107,7 +107,7 @@ export default function ArtistDetail() {
                 </Link>
             </div>
             <h2 className={artistNameStyles}>{artistDetails.name}</h2>
-            {image && <img src={image.url} alt={`Image of ${artistDetails.name}`} className={artistImageStyles} />}
+            {image && <img src={image.url} alt={artistDetails.name} className={artistImageStyles} />}
             <h3 className={topTracksHeaderStyles}>Top Tracks</h3>
             <ul className={topTracksStyles}>
                 {topTracks.tracks.map((track) => (
