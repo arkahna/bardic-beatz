@@ -112,7 +112,6 @@ const searchResultsStyles = css({
     borderRadius: '6px',
 })
 
-// Styles for the headings
 const headingStyles = css({
     fontSize: '24px',
     mb: '15px',
@@ -121,14 +120,12 @@ const headingStyles = css({
     paddingBottom: '10px',
 })
 
-// Styles for the lists
 const listStyles = css({
     listStyle: 'none',
     padding: '0',
     mb: '30px',
 })
 
-// Styles for each list item
 const listItemStyles = css({
     mb: '10px',
     '&:hover a': {
@@ -136,7 +133,6 @@ const listItemStyles = css({
     },
 })
 
-// Styles for the links
 const linkStyles = css({
     color: '#ffffff',
     textDecoration: 'none',
@@ -153,7 +149,6 @@ const songImageStyles = css({
     marginRight: '10px',
 })
 
-// Styles for song details (name and artist)
 const songDetailsStyles = css({
     display: 'flex',
     alignItems: 'center',
@@ -167,8 +162,4 @@ const formStyle = css({
     display: 'grid',
     gridTemplateColumns: '1fr auto',
     gap: '10px',
-})
-
-const spin = css({
-    animation: 'spin 1s infinite',
 })
