@@ -1,11 +1,11 @@
 import type { PopoverProps } from '@ark-ui/react'
 import { Portal } from '@ark-ui/react'
-import { useFetcher } from '@remix-run/react'
-import { useEffect } from 'react'
+import { Await, useFetcher } from '@remix-run/react'
+import type { Device } from '@spotify/web-api-ts-sdk'
+import { Suspense } from 'react'
 import { Airplay, X } from 'react-feather'
 import { Box, Stack } from 'styled-system/jsx'
 import { css } from '../../styled-system/css'
-import type { loader } from '../routes/api.devices'
 import { Button } from './primatives/button'
 import { IconButton } from './primatives/icon-button'
 import { Popover } from './primatives/popover'
@@ -29,7 +29,7 @@ const iconStyle = css({
     color: '#fff',
 })
 
-export function Players(props: PopoverProps) {
+export function Players(props: PopoverProps & { devices: Promise<Device[]> | undefined }) {
     return (
         <Popover.Root {...props} closeOnEsc unmountOnExit lazyMount>
             <Popover.Trigger asChild>
@@ -45,7 +45,7 @@ export function Players(props: PopoverProps) {
                         </Popover.Arrow>
                         <Stack gap="1">
                             <Popover.Title>Players</Popover.Title>
-                            <PlayerList />
+                            <PlayerList devices={props.devices} />
                         </Stack>
                         <Box position="absolute" top="1" right="1">
                             <Popover.CloseTrigger asChild>
@@ -61,43 +61,44 @@ export function Players(props: PopoverProps) {
     )
 }
 
-function PlayerList() {
-    const deviceFetcher = useFetcher<typeof loader>()
+function PlayerList({ devices: devicesPromises }: { devices: Promise<Device[]> | undefined }) {
     const switchDeviceFetcher = useFetcher()
 
-    useEffect(() => {
-        deviceFetcher.load(`/api/devices`)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    return (
+        <Suspense fallback={<p>Loading...</p>}>
+            <Await resolve={devicesPromises}>
+                {(devices) =>
+                    devices?.map((device) => {
+                        const isActive = switchDeviceFetcher.formData
+                            ? // use to optimistic value if submitting
+                              switchDeviceFetcher.formData.get('deviceId') === device.id
+                            : // fall back to the database state
+                              device.is_active
 
-    if (deviceFetcher.state === 'loading' && !deviceFetcher.data) return <p>Loading...</p>
-    if (!deviceFetcher.data) return <p>No devices</p>
+                        if (!device.id) {
+                            return null
+                        }
 
-    return deviceFetcher.data.devices.map((device) => {
-        const isActive = switchDeviceFetcher.formData
-            ? // use to optimistic value if submitting
-              switchDeviceFetcher.formData.get('deviceId') === device.id
-            : // fall back to the database state
-              device.is_active
-
-        if (!device.id) {
-            return null
-        }
-
-        return (
-            <switchDeviceFetcher.Form key={device.id} method="post" action="/api/switch-device">
-                <input type="hidden" name="deviceId" value={device.id} />
-                <Button
-                    variant="ghost"
-                    className={
-                        deviceNameStyle +
-                        (isActive ? ` ${switchDeviceFetcher.formData ? selectingStyle : activeStyle}` : '')
-                    }
-                    type="submit"
-                >
-                    {device.name}
-                </Button>
-            </switchDeviceFetcher.Form>
-        )
-    })
+                        return (
+                            <switchDeviceFetcher.Form key={device.id} method="post" action="/api/switch-device">
+                                <input type="hidden" name="deviceId" value={device.id} />
+                                <Button
+                                    variant="ghost"
+                                    className={
+                                        deviceNameStyle +
+                                        (isActive
+                                            ? ` ${switchDeviceFetcher.formData ? selectingStyle : activeStyle}`
+                                            : '')
+                                    }
+                                    type="submit"
+                                >
+                                    {device.name}
+                                </Button>
+                            </switchDeviceFetcher.Form>
+                        )
+                    })
+                }
+            </Await>
+        </Suspense>
+    )
 }

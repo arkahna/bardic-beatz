@@ -21,5 +21,8 @@ export async function action({ request }: ActionFunctionArgs) {
 
     await sdk.player.transferPlayback([deviceId.toString()])
 
+    // Give spotify enough time to return the right value when we re-fetch the devices
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
     return null
 }

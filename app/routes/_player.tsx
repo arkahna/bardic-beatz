@@ -1,10 +1,12 @@
-import { json, type LoaderFunctionArgs } from '@remix-run/node'
+import { defer, type LoaderFunctionArgs } from '@remix-run/node'
 import { Outlet, useLoaderData } from '@remix-run/react'
 import { css } from '../../styled-system/css'
 import { CurrentlyPlaying } from '../components/currently-playing'
 import { Sidebar } from '../components/sidebar'
 import { Topbar } from '../components/topbar'
+import type { ExtendedSpotifySession } from '../services/auth.server'
 import { spotifyStrategy } from '../services/auth.server'
+import { spotifySdk } from '../services/spotify.server'
 
 const mainContainerStyle = css({
     marginLeft: '196px',
@@ -21,10 +23,13 @@ const outletContainer = css({
 })
 
 export async function loader({ request }: LoaderFunctionArgs) {
-    const session = await spotifyStrategy.getSession(request)
+    const session = (await spotifyStrategy.getSession(request)) as ExtendedSpotifySession | null
     const user = session?.user ?? undefined
+    const sdk = session ? spotifySdk(session) : undefined
 
-    return json({ user })
+    const devices = sdk ? sdk.player.getAvailableDevices().then((result) => result.devices) : undefined
+
+    return defer({ user, devices })
 }
 
 export default function App() {
@@ -34,7 +39,7 @@ export default function App() {
         <div className={css({ height: 'screen' })}>
             <Sidebar />
             <div className={mainContainerStyle}>
-                <Topbar user={data.user} />
+                <Topbar user={data.user} devices={data.devices} />
                 <div className={outletContainer}>
                     <Outlet />
                 </div>

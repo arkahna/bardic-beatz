@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useRevalidator } from '@remix-run/react'
+import { useEffect, useReducer } from 'react'
 import { Pause, Play, SkipBack, SkipForward, Volume2 } from 'react-feather' // Importing icons
 import { css } from '../../styled-system/css'
 import { useGetToken } from '../lib/useGetToken'
@@ -72,38 +73,25 @@ declare global {
 }
 
 export function CurrentlyPlaying() {
-    // const play = usePlay()
     const getToken = useGetToken()
+    const revalidator = useRevalidator()
 
-    const [isPaused, setPaused] = useState(false)
-    const [, setActive] = useState(false)
-    const [current_track, setTrack] = useState<
-        | {
-              name: string
-              album: { images: Array<{ url: string }> }
-              artists: Array<{ name: string }>
-          }
-        | undefined
-    >()
-    const [position, setPosition] = useState(0)
-    const [duration, setDuration] = useState(0)
-    // as % of 100
-    const [volume, setVolume] = useState(50)
+    const [state, dispatch] = useReducer(reducer, initialState)
 
-    function playerStateChanged(state: Spotify.PlaybackState) {
+    function playerStateChanged(state: Spotify.PlaybackState | null) {
         if (!state) {
+            dispatch({ type: 'SET_ACTIVE', payload: false })
             return
         }
 
-        setTrack(state.track_window.current_track)
-        setPaused(state.paused)
-        setPosition(state.position)
-        setDuration(state.duration)
-
-        window.playerInstance!.getCurrentState().then((state) => {
-            !state ? setActive(false) : setActive(true)
-        })
+        dispatch({ type: 'UPDATE_PLAYER_STATE', payload: state })
     }
+
+    useEffect(() => {
+        if (state.current_track) {
+            revalidator.revalidate()
+        }
+    }, [state.current_track])
 
     useEffect(() => {
         if (!window.stateInterval) {
@@ -144,7 +132,7 @@ export function CurrentlyPlaying() {
                         console.log(err)
                     }
                 },
-                volume: volume / 100,
+                volume: state.volume / 100,
             })
 
             window.playerInstance.addListener('player_state_changed', playerStateChanged)
@@ -152,6 +140,7 @@ export function CurrentlyPlaying() {
             console.log('Connecting to spotify')
             window.playerInstance.addListener('ready', ({ device_id }) => {
                 console.log('Ready with Device ID', device_id)
+                revalidator.revalidate()
             })
 
             window.playerInstance.addListener('not_ready', ({ device_id }) => {
@@ -175,7 +164,7 @@ export function CurrentlyPlaying() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    if (!current_track) {
+    if (!state.current_track) {
         return null
     }
 
@@ -183,13 +172,13 @@ export function CurrentlyPlaying() {
         <div className={currentlyPlayingStyles}>
             <div className={songInfoStyles}>
                 <img
-                    src={current_track.album.images[0].url}
-                    alt={`${current_track.name} cover`}
+                    src={state.current_track.album.images[0].url}
+                    alt={`${state.current_track.name} cover`}
                     className={coverImageStyles}
                 />
                 <div>
-                    <div className={songTitleStyles}>{current_track.name}</div>
-                    <div className={artistStyles}>{current_track.artists[0].name}</div>
+                    <div className={songTitleStyles}>{state.current_track.name}</div>
+                    <div className={artistStyles}>{state.current_track.artists[0].name}</div>
                 </div>
             </div>
             <div className={songSectionStyles}>
@@ -200,7 +189,7 @@ export function CurrentlyPlaying() {
                     <IconButton
                         onClick={() => {
                             if (window.playerInstance) {
-                                if (isPaused) {
+                                if (state.isPaused) {
                                     window.playerInstance.resume()
                                 } else {
                                     window.playerInstance.pause()
@@ -209,26 +198,87 @@ export function CurrentlyPlaying() {
                         }}
                         variant="ghost"
                     >
-                        {!isPaused ? <Pause color="white" /> : <Play color="white" />}
+                        {!state.isPaused ? <Pause color="white" /> : <Play color="white" />}
                     </IconButton>
                     <IconButton onClick={() => {}} variant="ghost">
                         <SkipForward color="white" />
                     </IconButton>
                 </div>
                 <div className={progressBarStyles}>
-                    <ProgressBar position={position} duration={duration} />
+                    <ProgressBar position={state.position} duration={state.duration} />
                 </div>
             </div>
             <div className={volumeStyles}>
                 <Volume2 />
                 <VolumeBar
-                    value={volume}
+                    value={state.volume}
                     onValueChanged={(e) => {
-                        setVolume(e)
+                        dispatch({ type: 'SET_VOLUME', payload: e })
                         window.playerInstance?.setVolume(e / 100)
                     }}
                 />
             </div>
         </div>
     )
+}
+
+type State = {
+    isPaused: boolean
+    active: boolean
+    current_track:
+        | {
+              name: string
+              album: { images: Array<{ url: string }> }
+              artists: Array<{ name: string }>
+          }
+        | undefined
+    position: number
+    duration: number
+    volume: number
+}
+
+type Action =
+    | { type: 'SET_PAUSED'; payload: boolean }
+    | { type: 'SET_ACTIVE'; payload: boolean }
+    | { type: 'SET_TRACK'; payload: State['current_track'] }
+    | { type: 'SET_POSITION'; payload: number }
+    | { type: 'SET_DURATION'; payload: number }
+    | { type: 'SET_VOLUME'; payload: number }
+    | { type: 'UPDATE_PLAYER_STATE'; payload: Spotify.PlaybackState }
+
+const initialState: State = {
+    isPaused: false,
+    active: false,
+    current_track: undefined,
+    position: 0,
+    duration: 0,
+    volume: 50,
+}
+
+function reducer(state: State, action: Action): State {
+    switch (action.type) {
+        case 'SET_PAUSED':
+            return { ...state, isPaused: action.payload }
+        case 'SET_ACTIVE':
+            return { ...state, active: action.payload }
+        case 'SET_TRACK':
+            return { ...state, current_track: action.payload }
+        case 'SET_POSITION':
+            return { ...state, position: action.payload }
+        case 'SET_DURATION':
+            return { ...state, duration: action.payload }
+        case 'SET_VOLUME':
+            return { ...state, volume: action.payload }
+        case 'UPDATE_PLAYER_STATE':
+            return {
+                ...state,
+                isPaused: action.payload.paused,
+                active: true,
+                current_track: action.payload.track_window.current_track,
+                position: action.payload.position,
+                duration: action.payload.duration,
+            }
+        default:
+            return state
+    }
 }

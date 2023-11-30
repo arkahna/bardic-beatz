@@ -1,5 +1,6 @@
 import type { SerializeFrom } from '@remix-run/node'
 import { Form } from '@remix-run/react'
+import type { Device } from '@spotify/web-api-ts-sdk'
 import type { User } from 'remix-auth-spotify'
 import { css } from '../../styled-system/css'
 import { Players } from './players'
@@ -58,7 +59,13 @@ const loginButtonStyles = css({
     ml: '20px',
 })
 
-export function Topbar({ user }: { user: SerializeFrom<User> | undefined }) {
+export function Topbar({
+    user,
+    devices,
+}: {
+    user: SerializeFrom<User> | undefined
+    devices: Promise<Device[]> | undefined
+}) {
     return (
         <div className={topbarStyles}>
             <div />
@@ -82,7 +89,7 @@ export function Topbar({ user }: { user: SerializeFrom<User> | undefined }) {
 
                 {user ? (
                     <>
-                        <Players />
+                        <Players devices={devices} />
                         <UserAvatar user={user} />
                     </>
                 ) : null}
