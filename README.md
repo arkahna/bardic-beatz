@@ -1,14 +1,22 @@
-# templates/unstable-vite-express
-
-⚠️ Remix support for Vite is unstable and not recommended for production.
-
-📖 See the [Remix Vite docs][remix-vite-docs] for details on supported features.
+# Bardic Beatz
 
 ## Setup
 
+Install dependencies:
+
 ```shellscript
-npx create-remix@latest --template remix-run/remix/templates/unstable-vite-express
+pnpm i
 ```
+
+Create a `.env` file in the root directory with the following contents:
+
+```shellscript
+SPOTIFY_CLIENT_ID=<your spotify client id>
+SPOTIFY_CLIENT_SECRET=<your spotify client secret>
+SPOTIFY_CALLBACK_URL="http://localhost:3000/auth/spotify/callback"
+```
+
+You can get your Spotify client ID and secret by creating a Spotify app [here](https://developer.spotify.com/dashboard/applications).
 
 ## Run
 
@@ -24,18 +32,3 @@ Or build your app for production and run it:
 npm run build
 npm run start
 ```
-
-## Customize
-
-Remix exposes APIs for integrating Vite with a custom server:
-
-```ts
-import {
-  unstable_createViteServer,
-  unstable_loadViteServerBuild,
-} from "@remix-run/dev";
-```
-
-In this template, we'll use Express but remember that these APIs can be used with _any_ Node-compatible server setup that supports standard middleware.
-
-[remix-vite-docs]: https://remix.run/docs/en/main/future/vite
