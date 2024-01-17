@@ -1,0 +1,45 @@
+{
+    "name": "webapp",
+    "private": true,
+    "sideEffects": false,
+    "type": "module",
+    "scripts": {
+        "start": "cross-env NODE_ENV=production node ./server.mjs"
+    },
+    "dependencies": {
+        "@ark-ui/anatomy": "^1.0.0",
+        "@ark-ui/react": "^1.0.1",
+        "@fontsource/barlow": "^5.0.8",
+        "@heroicons/react": "^2.0.18",
+        "@nx/esbuild": "^17.2.8",
+        "@remix-run/express": "^2.3.0",
+        "@remix-run/node": "^2.3.0",
+        "@remix-run/react": "^2.3.0",
+        "@spotify/web-api-ts-sdk": "^1.1.2",
+        "express": "^4.18.2",
+        "isbot": "^3.6.8",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-feather": "^2.0.10",
+        "remix-auth": "^3.6.0",
+        "remix-auth-spotify": "^1.3.1"
+    },
+    "devDependencies": {
+        "@pandacss/dev": "^0.19.0",
+        "@park-ui/panda-preset": "^0.23.0",
+        "@remix-run/dev": "^2.3.0",
+        "@remix-run/eslint-config": "^2.3.0",
+        "@types/express": "^4.17.20",
+        "@types/react": "^18.2.20",
+        "@types/react-dom": "^18.2.7",
+        "@types/spotify-web-playback-sdk": "^0.1.19",
+        "cross-env": "^7.0.3",
+        "eslint": "^8.38.0",
+        "typescript": "^5.1.6",
+        "vite": "^5.0.0",
+        "vite-tsconfig-paths": "^4.2.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

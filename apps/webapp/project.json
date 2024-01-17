@@ -1,0 +1,97 @@
+{
+    "name": "webapp",
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "apps/webapp",
+    "projectType": "application",
+    "targets": {
+        "build-server": {
+            "executor": "@nx/esbuild:esbuild",
+            "outputs": ["{options.outputPath}"],
+            "options": {
+                "platform": "node",
+                "outputPath": "apps/webapp/build",
+                "assets": [],
+                "format": ["cjs"],
+                "bundle": true,
+                "skipTypeCheck": true,
+                "main": "apps/webapp/server.ts",
+                "tsConfig": "apps/webapp/tsconfig.json",
+                "esbuildOptions": {
+                    "external": ["./index.js"],
+                    "target": "node20",
+                    "packages": "external",
+                    "sourcemap": true,
+                    "outExtension": {
+                        ".js": ".js"
+                    }
+                },
+                "thirdParty": true
+            },
+            "configurations": {
+                "development": {},
+                "production": {}
+            }
+        },
+        "build-remix": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "remix build --sourcemap",
+                "cwd": "apps/webapp"
+            }
+        },
+        "build": {
+            "executor": "nx:noop",
+            "options": {},
+            "dependsOn": ["build-remix", "build-server"]
+        },
+        "serve": {
+            "executor": "nx:run-commands",
+            "options": {
+                "commands": [
+                    "azurite",
+                    "remix dev --manual -c \"node --watch-path ./build/server.js --watch ./build/server.js\" | pino-pretty"
+                ],
+                "cwd": "apps/webapp"
+            },
+            "dependsOn": ["build"]
+        },
+        "setup": {
+            "executor": "nx:noop",
+            "dependsOn": ["prisma-generate"]
+        },
+        "lint": {
+            "executor": "@nx/eslint:lint",
+            "options": {
+                "lintFilePatterns": [
+                    "apps/webapp/**/*.ts",
+                    "apps/webapp/**/*.tsx",
+                    "apps/webapp/**/*.spec.ts",
+                    "apps/webapp/**/*.spec.tsx",
+                    "apps/webapp/**/*.d.ts"
+                ]
+            }
+        },
+        "test": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "vitest --run --passWithNoTests",
+                "cwd": "apps/webapp"
+            }
+        },
+        "watch-tests": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "vitest",
+                "cwd": "apps/webapp"
+            }
+        },
+        "e2e": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "playwright test",
+                "cwd": "apps/webapp"
+            }
+        }
+    },
+    "implicitDependencies": []
+}
