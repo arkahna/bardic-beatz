@@ -48,7 +48,6 @@
             "executor": "nx:run-commands",
             "options": {
                 "commands": [
-                    "azurite",
                     "remix dev --manual -c \"node --watch-path ./build/server.js --watch ./build/server.js\" | pino-pretty"
                 ],
                 "cwd": "apps/webapp"
