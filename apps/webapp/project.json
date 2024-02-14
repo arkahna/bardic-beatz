@@ -1,8 +1,6 @@
 {
     "name": "webapp",
     "$schema": "../../node_modules/nx/schemas/project-schema.json",
-    "sourceRoot": "apps/webapp",
-    "projectType": "application",
     "targets": {
         "build-server": {
             "executor": "@nx/esbuild:esbuild",
@@ -17,7 +15,7 @@
                 "main": "apps/webapp/server.ts",
                 "tsConfig": "apps/webapp/tsconfig.json",
                 "esbuildOptions": {
-                    "external": ["./index.js"],
+                    "external": ["./server/index.js"],
                     "target": "node20",
                     "packages": "external",
                     "sourcemap": true,
@@ -27,15 +25,20 @@
                 },
                 "thirdParty": true
             },
-            "configurations": {
-                "development": {},
-                "production": {}
-            }
+            "dependsOn": ["setup"]
+        },
+        "setup": {
+            "executor": "nx:run-commands",
+            "options": {
+                "command": "pnpm panda codegen",
+                "cwd": "apps/webapp"
+            },
+            "dependsOn": ["prisma-generate"]
         },
         "build-remix": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "remix build --sourcemap",
+                "command": "remix vite:build",
                 "cwd": "apps/webapp"
             }
         },
@@ -47,16 +50,10 @@
         "serve": {
             "executor": "nx:run-commands",
             "options": {
-                "commands": [
-                    "remix dev --manual -c \"node --watch-path ./build/server.js --watch ./build/server.js\" | pino-pretty"
-                ],
+                "command": "node ./build/server.js | pino-pretty",
                 "cwd": "apps/webapp"
             },
-            "dependsOn": ["build"]
-        },
-        "setup": {
-            "executor": "nx:noop",
-            "dependsOn": ["prisma-generate"]
+            "dependsOn": ["build-server"]
         },
         "lint": {
             "executor": "@nx/eslint:lint",
@@ -87,10 +84,18 @@
         "e2e": {
             "executor": "nx:run-commands",
             "options": {
-                "command": "playwright test",
+                "command": "playwright test | pnpm pino-pretty",
                 "cwd": "apps/webapp"
             }
+        },
+        "features-gen": {
+            "executor": "@featureboard/nx-plugin:code-gen",
+            "outputs": ["{projectRoot}/app/services"],
+            "options": {
+                "template": "typescript",
+                "featureBoardProductName": "Bardic Beatz",
+                "subFolder": "../../app/services"
+            }
         }
-    },
-    "implicitDependencies": []
+    }
 }

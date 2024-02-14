@@ -1,20 +1,9 @@
 import { Authenticator } from 'remix-auth'
 import type { User } from 'remix-auth-spotify'
 import { SpotifyStrategy } from 'remix-auth-spotify'
+import { SPOTIFY_CALLBACK_URL, SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from '../lib/config.server'
 
 import { sessionStorage } from '~/services/session.server'
-
-if (!process.env.SPOTIFY_CLIENT_ID) {
-    throw new Error('Missing SPOTIFY_CLIENT_ID env')
-}
-
-if (!process.env.SPOTIFY_CLIENT_SECRET) {
-    throw new Error('Missing SPOTIFY_CLIENT_SECRET env')
-}
-
-if (!process.env.SPOTIFY_CALLBACK_URL) {
-    throw new Error('Missing SPOTIFY_CALLBACK_URL env')
-}
 
 // See https://developer.spotify.com/documentation/general/guides/authorization/scopes
 const scopes = [
@@ -38,9 +27,9 @@ export interface ExtendedSpotifySession {
 
 export const spotifyStrategy = new SpotifyStrategy(
     {
-        clientID: process.env.SPOTIFY_CLIENT_ID,
-        clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-        callbackURL: process.env.SPOTIFY_CALLBACK_URL,
+        clientID: SPOTIFY_CLIENT_ID,
+        clientSecret: SPOTIFY_CLIENT_SECRET,
+        callbackURL: SPOTIFY_CALLBACK_URL,
         sessionStorage,
         scope: scopes,
     },
@@ -58,6 +47,8 @@ export const spotifyStrategy = new SpotifyStrategy(
                 email: profile.emails[0].value,
                 name: profile.displayName,
                 image: profile.__json.images?.[0]?.url,
+                product: profile.__json.product,
+                explicitContent: !profile.__json.explicit_content.filter_enabled,
             },
         }
     }

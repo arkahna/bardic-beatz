@@ -1,5 +1,5 @@
 {
-    "include": ["env.d.ts", "**/*.ts", "**/*.tsx"],
+    "include": ["env.d.ts", "**/*.ts", "**/*.tsx", "vite.config.mts", "styled-system/*.d.ts", "styled-system/*.mjs"],
     "compilerOptions": {
         "lib": ["DOM", "DOM.Iterable", "ES2022"],
         "isolatedModules": true,
@@ -11,14 +11,13 @@
         "target": "ES2022",
         "strict": true,
         "allowJs": true,
-        "skipDefaultLibCheck": true,
+        "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "baseUrl": ".",
         "types": ["@types/spotify-web-playback-sdk"],
         "paths": {
             "~/*": ["./app/*"]
         },
-
         "noEmit": true
     }
 }

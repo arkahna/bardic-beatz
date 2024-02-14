@@ -1,3 +1,4 @@
+import type { Preset } from '@pandacss/dev'
 import { defineConfig } from '@pandacss/dev'
 import { createPreset } from '@park-ui/panda-preset'
 
@@ -11,11 +12,11 @@ export default defineConfig({
             accentColor: 'jade',
             grayColor: 'slate',
             borderRadius: 'sm',
-        }),
+        }) as Preset,
     ],
 
     // Where to look for your css declarations
-    include: ['./app/**/*.{js,jsx,ts,tsx}'],
+    include: ['./app/routes/**/*.{ts,tsx,js,jsx}', './app/components/**/*.{ts,tsx,js,jsx}'],
 
     // Files to exclude
     exclude: [],

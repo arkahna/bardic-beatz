@@ -9,10 +9,33 @@ import { PassThrough } from 'node:stream'
 import type { AppLoadContext, EntryContext } from '@remix-run/node'
 import { createReadableStreamFromReadable } from '@remix-run/node'
 import { RemixServer } from '@remix-run/react'
-import isbot from 'isbot'
+import { isbot } from 'isbot'
 import { renderToPipeableStream } from 'react-dom/server'
+import type { Logger } from 'pino'
+import { ServerClient } from '@featureboard/node-sdk'
+import { User } from 'remix-auth-spotify'
 
 const ABORT_DELAY = 5_000
+
+export function getLoadContext(log: Logger, requestId: string, serverClient: ServerClient): AppLoadContext {
+    return {
+        log,
+        requestId,
+        featuresFor: createFeaturesFor(serverClient),
+    }
+}
+
+function createFeaturesFor(serverClient: ServerClient): AppLoadContext['featuresFor'] {
+    return function featuresFor(whom) {
+        if (whom == null) {
+            return serverClient.request([])
+        }
+        return serverClient.request([
+            `plan-${whom.product}`,
+            ...(whom.explicitContent ? [] : ['preference-no-explicit']),
+        ])
+    }
+}
 
 export default function handleRequest(
     request: Request,

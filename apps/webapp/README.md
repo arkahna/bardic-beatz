@@ -14,6 +14,7 @@ Create a `.env` file in the root directory with the following contents:
 SPOTIFY_CLIENT_ID=<your spotify client id>
 SPOTIFY_CLIENT_SECRET=<your spotify client secret>
 SPOTIFY_CALLBACK_URL="http://localhost:3000/auth/spotify/callback"
+FEATUREBOARD_ENVIRONMENT_APIKEY=<you FeatureBoard environment API Key>
 ```
 
 You can get your Spotify client ID and secret by creating a Spotify app [here](https://developer.spotify.com/dashboard/applications).

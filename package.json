@@ -8,11 +8,13 @@
     "help": "nx help"
   },
   "private": true,
-  "dependencies": {},
   "devDependencies": {
+    "@featureboard/nx-plugin": "^0.3.9",
     "@nx/js": "17.2.8",
     "@nx/workspace": "17.2.8",
-    "nx": "17.2.8"
-  }
-
+    "nx": "17.2.8",
+    "remix-development-tools": "^3.7.4",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
 }
