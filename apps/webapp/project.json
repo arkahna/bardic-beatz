@@ -94,7 +94,7 @@
             "options": {
                 "template": "typescript",
                 "featureBoardProductName": "Bardic Beatz",
-                "subFolder": "../../app/services"
+                "subFolder": "./app/services"
             }
         }
     }
